@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, QrCode, X, Check, AlertTriangle, Ban, DoorOpen } from "lucide-react";
 
-type Facility = { id: string; name: string; hours: string; count: number; capacity: number; rooms: string[] };
+type Facility = { id: string; name: string; hours: string; count: number; capacity: number; rooms: string[]; closed?: boolean; note?: string };
 
 const FACILITIES: Facility[] = [
   { id: "REC", name: "Recreation Center", hours: "6 AM – 11 PM", count: 142, capacity: 200, rooms: ["Court 1", "Court 2", "Yoga Studio"] },
@@ -10,12 +10,14 @@ const FACILITIES: Facility[] = [
   { id: "LAB", name: "Science Lab B", hours: "9 AM – 6 PM", count: 12, capacity: 40, rooms: ["Bench 4", "Bench 7"] },
   { id: "POOL", name: "Aquatic Center", hours: "6 AM – 9 PM", count: 60, capacity: 60, rooms: ["Lane 1", "Lane 2", "Lane 3"] },
   { id: "ART", name: "Arts Building", hours: "8 AM – 8 PM", count: 35, capacity: 120, rooms: ["Music Practice 1", "Studio A"] },
+  { id: "TUT", name: "Tutoring Center", hours: "9 AM – 5 PM", count: 0, capacity: 30, rooms: ["Desk 1", "Desk 2"], closed: true, note: "Closed until 9 AM tomorrow" },
 ];
 const ROOM_TIMES = ["10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM", "6:00 PM"];
 
-type Msg = { kind: "success" | "warn" | "error"; text: string } | null;
+type Msg = { kind: "success" | "warn" | "error"; title: string; text: string } | null;
 
 const level = (f: Facility) => {
+  if (f.closed) return { label: "Closed", cls: "crowd-full" };
   const r = f.count / f.capacity;
   if (r >= 1) return { label: "Full", cls: "crowd-full" };
   if (r >= 0.7) return { label: "Busy", cls: "crowd-busy" };
@@ -34,18 +36,23 @@ export function Facilities() {
 
   const checkIn = (id: string) => {
     const f = list.find((x) => x.id === id);
-    if (!f) return setMsg({ kind: "error", text: "That QR code doesn't match a campus facility." });
+    if (!f) return setMsg({ kind: "error", title: "Check-in denied", text: "That QR code doesn't match a campus facility. Use the code printed by the entrance." });
     if (checkedIn === id) {
       setCheckedIn(null);
       setList(list.map((x) => (x.id === id ? { ...x, count: x.count - 1 } : x)));
-      return setMsg({ kind: "success", text: `You've checked out of ${f.name}.` });
+      return setMsg({ kind: "success", title: "Checked out", text: `You've checked out of ${f.name}. Your visit was recorded.` });
+    }
+    if (f.closed) return setMsg({ kind: "error", title: "Check-in denied", text: `${f.name} is ${f.note ?? "closed right now"}. Check the posted hours before you scan.` });
+    if (checkedIn) {
+      const here = list.find((x) => x.id === checkedIn);
+      return setMsg({ kind: "error", title: "Check-in denied", text: `You're already checked in at ${here?.name ?? "another facility"}. Check out there first, then scan again.` });
     }
     const pct = f.count / f.capacity;
-    if (pct >= 1) return setMsg({ kind: "error", text: `${f.name} is at full capacity (${f.count}/${f.capacity}). Try again later or prebook a room.` });
+    if (pct >= 1) return setMsg({ kind: "error", title: "Check-in denied", text: `${f.name} is at full capacity (${f.count}/${f.capacity}). Try again later or prebook a room.` });
     setList(list.map((x) => (x.id === id ? { ...x, count: x.count + 1 } : x)));
     setCheckedIn(id);
-    if (pct >= 0.7) setMsg({ kind: "warn", text: `Checked into ${f.name}, but it's busy right now (${f.count + 1}/${f.capacity}). Expect a wait.` });
-    else setMsg({ kind: "success", text: `Checked into ${f.name}! It's quiet right now (${f.count + 1}/${f.capacity}).` });
+    if (pct >= 0.7) setMsg({ kind: "warn", title: "Check-in accepted", text: `You're in at ${f.name}, but it's busy right now (${f.count + 1}/${f.capacity}). Expect a wait for a spot.` });
+    else setMsg({ kind: "success", title: "Check-in accepted", text: `You're in at ${f.name}. It's quiet right now (${f.count + 1}/${f.capacity}).` });
   };
 
   return (
@@ -65,9 +72,12 @@ export function Facilities() {
       </button>
 
       {msg && (
-        <div className={`alert alert-${msg.kind} mt-3`} role="status">
+        <div className={`alert alert-${msg.kind} mt-3`} role={msg.kind === "error" ? "alert" : "status"}>
           {msg.kind === "success" ? <Check className="h-5 w-5 shrink-0" /> : msg.kind === "warn" ? <AlertTriangle className="h-5 w-5 shrink-0" /> : <Ban className="h-5 w-5 shrink-0" />}
-          <span className="flex-1">{msg.text}</span>
+          <span className="flex-1">
+            <span className="block font-display text-sm font-bold uppercase tracking-wide">{msg.title}</span>
+            <span className="mt-1 block text-[0.82rem] font-normal leading-snug opacity-90">{msg.text}</span>
+          </span>
           <button onClick={() => setMsg(null)} aria-label="Dismiss"><X className="h-4 w-4" /></button>
         </div>
       )}
@@ -89,11 +99,15 @@ export function Facilities() {
               <div className="mt-3 h-2 rounded-full bg-card">
                 <div className={`h-2 rounded-full bar-${lv.cls}`} style={{ width: `${Math.min(100, (f.count / f.capacity) * 100)}%` }} />
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{f.count} / {f.capacity} people</p>
+              <p className="mt-1 text-xs text-muted-foreground">{f.closed ? f.note : `${f.count} / ${f.capacity} people`}</p>
               <div className="mt-3 flex gap-2">
-                <button onClick={() => checkIn(f.id)} className={on ? "chip chip-active" : "chip"}>
-                  {on ? <><Check className="h-4 w-4" /> Checked in · tap to leave</> : "Check in"}
-                </button>
+                {f.closed ? (
+                  <span className="chip opacity-60"><Ban className="h-4 w-4" /> Closed</span>
+                ) : (
+                  <button onClick={() => checkIn(f.id)} className={on ? "chip chip-active" : "chip"}>
+                    {on ? <><Check className="h-4 w-4" /> Checked in · tap to leave</> : "Check in"}
+                  </button>
+                )}
                 <button onClick={() => setBookFor(f)} className="chip"><DoorOpen className="h-4 w-4" /> Prebook room</button>
               </div>
             </li>
@@ -108,7 +122,7 @@ export function Facilities() {
         />
       )}
       {bookFor && (
-        <BookRoom f={bookFor} onClose={() => setBookFor(null)} onBooked={(text) => { setBookFor(null); setMsg({ kind: "success", text }); }} />
+        <BookRoom f={bookFor} onClose={() => setBookFor(null)} onBooked={(text) => { setBookFor(null); setMsg({ kind: "success", title: "Room reserved", text }); }} />
       )}
     </section>
   );
