@@ -56,7 +56,7 @@ function Dashboard() {
 
   const book = () => {
     if (!slot) return;
-    const a = ADVISORS[advisor];
+    const a = ADVISORS[advisor]!;
     setEvents([...events, { day: 4, time: slot, title: `Session with ${a.name}` }]);
     setBooked(`Booked with ${a.name} on Fri at ${slot}`);
     setSlot(null);
