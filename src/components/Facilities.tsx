@@ -10,7 +10,7 @@ const FACILITIES: Facility[] = [
   { id: "LAB", name: "Science Lab B", hours: "9 AM – 6 PM", count: 12, capacity: 40, rooms: ["Bench 4", "Bench 7"] },
   { id: "POOL", name: "Aquatic Center", hours: "6 AM – 9 PM", count: 60, capacity: 60, rooms: ["Lane 1", "Lane 2", "Lane 3"] },
   { id: "ART", name: "Arts Building", hours: "8 AM – 8 PM", count: 35, capacity: 120, rooms: ["Music Practice 1", "Studio A"] },
-  { id: "TUT", name: "Tutoring Center", hours: "9 AM – 5 PM", count: 0, capacity: 30, rooms: ["Desk 1", "Desk 2"], closed: true, note: "Closed until 9 AM tomorrow" },
+  { id: "TUT", name: "Tutoring Center", hours: "9 AM – 5 PM", count: 0, capacity: 30, rooms: ["Desk 1", "Desk 2"], closed: true, note: "closed until 9 AM tomorrow" },
 ];
 const ROOM_TIMES = ["10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM", "6:00 PM"];
 
