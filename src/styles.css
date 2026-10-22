@@ -151,5 +151,12 @@
   .field:focus { border-color:var(--color-primary); box-shadow:0 0 0 4px color-mix(in oklab, var(--color-primary) 18%, transparent); }
   .btn-primary { border-radius:1rem; background:var(--color-primary); color:var(--color-primary-foreground); padding:1rem; font-weight:700; font-size:1.05rem; box-shadow:0 10px 24px -10px var(--color-primary); transition:transform .15s; }
   .btn-primary:active { transform:scale(.98); }
+  .card { border-radius:1.5rem; background:var(--color-card); padding:1.25rem; box-shadow:0 8px 30px -18px color-mix(in oklab, var(--color-foreground) 40%, transparent); }
+  .day { display:flex; flex-direction:column; align-items:center; gap:2px; border-radius:.9rem; padding:.5rem 0; color:var(--color-muted-foreground); }
+  .day-active { background:var(--color-primary); color:var(--color-primary-foreground); }
+  .chip { display:inline-flex; align-items:center; gap:4px; border-radius:999px; border:1.5px solid var(--color-primary); padding:.4rem .8rem; font-size:.8rem; font-weight:600; color:var(--color-primary); }
+  .chip-active { background:var(--color-primary); color:var(--color-primary-foreground); }
+  .option { display:flex; flex-direction:column; align-items:flex-start; border-radius:1rem; border:1.5px solid var(--color-border); padding:.75rem 1rem; color:var(--color-foreground); text-align:left; }
+  .option-active { border-color:var(--color-primary); background:color-mix(in oklab, var(--color-primary) 10%, transparent); }
   .hero-blob { position:fixed; top:-120px; right:-100px; width:300px; height:300px; border-radius:50%; background:var(--accent-warm); opacity:.45; filter:blur(10px); pointer-events:none; }
 }

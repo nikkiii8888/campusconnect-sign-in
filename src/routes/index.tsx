@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff, GraduationCap } from "lucide-react";
 
@@ -21,6 +21,7 @@ function SignIn() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -29,6 +30,7 @@ function SignIn() {
       return;
     }
     setError("");
+    navigate({ to: "/dashboard" });
   };
 
   return (
