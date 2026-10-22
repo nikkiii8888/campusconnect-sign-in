@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { CalendarDays, MapPin, Wallet, BookOpen, UserRound, LogOut, Check } from "lucide-react";
+import { Facilities } from "@/components/Facilities";
+import { CalendarDays, Wallet, BookOpen, UserRound, LogOut, Check } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -27,12 +28,6 @@ const START_EVENTS: Event[] = [
   { day: 3, time: "4:30 PM", title: "Study group – Library" },
   { day: 4, time: "1:00 PM", title: "PSY 100 Midterm" },
 ];
-const FACILITIES = [
-  { name: "Recreation Center", busy: "Moderate" },
-  { name: "Main Library", busy: "Busy" },
-  { name: "Student Union", busy: "Quiet" },
-  { name: "Science Lab B", busy: "Quiet" },
-];
 const COURSES = [
   { code: "BIO 210", name: "Cell Biology", grade: "A-", pct: 91 },
   { code: "MATH 152", name: "Calculus II", grade: "B+", pct: 88 },
@@ -56,7 +51,6 @@ type Booking = { advisor: number; date: number; time: string; topic: string; dur
 function Dashboard() {
   const [day, setDay] = useState(3);
   const [events, setEvents] = useState(START_EVENTS);
-  const [checkedIn, setCheckedIn] = useState<string | null>(null);
   const [advisor, setAdvisor] = useState(0);
   const [bDate, setBDate] = useState(23);
   const [slot, setSlot] = useState<string | null>(null);
@@ -113,25 +107,7 @@ function Dashboard() {
           </ul>
         </section>
 
-        <section className="card">
-          <CardTitle icon={<MapPin />} title="Check into facilities" />
-          <ul className="mt-4 flex flex-col gap-2">
-            {FACILITIES.map((f) => {
-              const on = checkedIn === f.name;
-              return (
-                <li key={f.name} className="flex items-center justify-between rounded-xl bg-muted p-3">
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{f.name}</p>
-                    <p className="text-xs text-muted-foreground">{f.busy}</p>
-                  </div>
-                  <button onClick={() => setCheckedIn(on ? null : f.name)} className={on ? "chip chip-active" : "chip"}>
-                    {on ? <><Check className="h-4 w-4" /> Checked in</> : "Check in"}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+        <Facilities />
 
         <section className="card">
           <CardTitle icon={<Wallet />} title="Finances" />
